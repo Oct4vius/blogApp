@@ -6,6 +6,7 @@ import Menu from '../../Components/Menu/Menu'
 import axios from 'axios'
 import moment from 'moment'
 import { AuthContext } from '../../context/authContext'
+import DOMPurify from "dompurify";
 
 const Single = () => {
 
@@ -27,7 +28,9 @@ const Single = () => {
 
     const fetchData = async ()=>{
       try {
-        const res = await axios.get(`http://localhost:8800/api/posts/${postId}`)
+        const res = await axios.get(`http://localhost:8800/api/posts/${postId}`,{
+          withCredentials: true
+        })
         setPost(res.data)
 
       } catch (err) {
@@ -39,7 +42,9 @@ const Single = () => {
 
   const handleDelete = async () =>{
     try {
-      await axios.delete(`${API_URL}${postId}`)
+      await axios.delete(`${API_URL}${postId}`,{
+        withCredentials: true
+      })
       navigate("/")
     
     } catch (err) {
@@ -47,38 +52,41 @@ const Single = () => {
     }
   }
 
+  const getText = (html) =>{
+    const doc = new DOMParser().parseFromString(html, "text/html")
+    return doc.body.textContent
+  }
+
   return (
     <div className="single">
       <div className="content">
-        <img src={post?.img}/>
+        <img src={`../public/uploads/${post?.img}`} alt="" />
         <div className="user">
-          {post.userImage && <img src={post.userImage} />}
-        
+          {post.userImg && <img
+            src={post.userImg}
+            alt=""
+          />}
           <div className="info">
             <span>{post.username}</span>
-            <p>Posted {moment(post.data).fromNow()}</p>
+            <p>Posted {moment(post.date).fromNow()}</p>
           </div>
-          { currentUser?.username === post.username && (<div className="edit">
-            <Link to={`/write?edit=2`}>
-              <img src={Edit} alt="" />
-            </Link>
-            <img onClick={handleDelete} src={Delete} />
-          </div>)}
+          {currentUser.username === post.username && (
+            <div className="edit">
+              <Link to={`/write?edit=2`} state={post}>
+                <img src={Edit} alt="" />
+              </Link>
+              <img onClick={handleDelete} src={Delete} alt="" />
+            </div>
+          )}
         </div>
         <h1>{post.title}</h1>
-
-        <p>{post.description}</p>
-
-        {/* <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem eum beatae debitis voluptatibus, esse cupiditate! Distinctio, voluptatibus? Neque veniam numquam voluptas nesciunt <br /> <br /> earum beatae reiciendis, ut optio necessitatibus minus adipisci. Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis sequi laborum unde non saepe ab nemo voluptate! Autem error quam itaque totam, in harum maiores alias quos amet odio architecto.
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Rem iusto assumenda aliquam sunt illum esse eum, similique adipisci quidem excepturi quia nobis velit reiciendis aspernatur ab temporibus commodi iure. Neque. <br /> <br />
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quaerat accusamus delectus, optio quo consectetur impedit quas illum. Neque, itaque tempore dolore accusamus repellendus soluta recusandae dolorem corporis ea, eum facilis.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam provident ipsa quidem, excepturi eaque officiis consequuntur velit impedit omnis voluptas, tempora magnam molestiae neque sapiente quis nostrum? Ullam, sapiente non. <br/> <br />
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero aspernatur explicabo quod dignissimos. Mollitia odio eligendi ullam soluta tempore quidem doloribus iusto voluptate? Eos, officiis quos cumque exercitationem ex alias.
-        </p> */}
-      </div>
-      <Menu/>
+        <p
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(post.description),
+          }}
+        ></p>      </div>
+      <Menu cat={post.cat}/>
     </div>
-  )
-}
-
+  );
+};
 export default Single

@@ -4,34 +4,36 @@ import usersRoutes from './routes/users.routes.js'
 import postsRoutes from './routes/posts.routes.js'
 import authRoutes from './routes/auth.routes.js'
 import cookieParser from 'cookie-parser';
+import multer from 'multer';
 
 const app = express();
 
+const corsOptions = {
+    origin: 'http://localhost:5173', // Cambia esto al dominio correcto desde el que se realizarán las solicitudes
+    credentials: true, // Habilita el envío de cookies y otros datos de autenticación
+};
 
 
-app.use(function (req, res, next) {
-
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8800');
-
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
-
-    // Pass to next layer of middleware
-    next();
-});
-
-
-app.use(cors());
-app.use(express.json())
+app.use(cors(corsOptions));
 app.use(cookieParser());
+app.use(express.json())
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, '../client/public/uploads')
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now()+file.originalname)
+    }
+})
+
+const upload = multer({storage})
+
+app.post('/api/uploads', upload.single('file'), function (req, res){
+    const file = req.file
+    res.status(200).json(file.filename)
+})
+
 app.use('/api/users', usersRoutes)
 app.use('/api/posts', postsRoutes)
 app.use('/api/auth', authRoutes)

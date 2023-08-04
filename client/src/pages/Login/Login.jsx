@@ -15,29 +15,22 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  
-
   const {login} = useContext(AuthContext);
 
 
-  const handleChange = e =>{
+  const handleChange = (e) =>{
     setInputs(prev=>({...prev, [e.target.name]: e.target.value}))
   }
 
-  const handleSubmit = async e =>{
-    e.preventDefault()
-
-    try{
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
       await login(inputs)
-      await axios.post(URL_API, inputs)
-      navigate("/")
-
-    }catch(err){
-      setError(err.response.data)
+      navigate("/");
+    } catch (err) {
+      setError(err.response.data);
     }
-
-    
-  }
+  };
 
   return (
     <div className='auth' >

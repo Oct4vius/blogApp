@@ -37,34 +37,34 @@ export const register = (req, res) =>{
 
 export const login = (req, res) =>{
     //VER SI EL USUARIO EXISTE
+    const q = "SELECT * FROM users WHERE username = ?";
 
-    const {username} = req.body;
-
-
-    const q = "SELECT * FROM users WHERE username = ?"
-
-    db.query(q, [username], (err, data)=>{
-
-        res.header('Access-Control-Allow-Credentials', true);
-        if(err) return res.json(err)
-        if(data.length === 0) return res.status(404).json("El usuario no fue encontrado.");
-        
-        //Verificar Contraseña
-
-        const isPasswordCorrect = bcrypt.compareSync(
-            req.body.password,
-            data[0].password
-        );
-        if(!isPasswordCorrect) return res.status(400).json("Usuario o Contraseña incorrecta.");
-
-        const token = jwt.sign({id: data[0].id}, "holacomoesta")
-        const {password, ...other} = data[0]
-
-        res.cookie("access_token", token).status(200).json(other).send();
-
-        console.log(token)
+    db.query(q, [req.body.username], (err, data) => {
+      if (err) return res.status(500).json(err);
+      if (data.length === 0) return res.status(404).json("User not found!");
+  
+      //Check password
+      const isPasswordCorrect = bcrypt.compareSync(
+        req.body.password,
+        data[0].password
+      );
+  
+      if (!isPasswordCorrect)
+        return res.status(400).json("Wrong username or password!");
+  
+      const token = jwt.sign({ id: data[0].id }, "jwtkey");
+      const { password, ...other } = data[0];
+  
+      res
+        .cookie("access_token", token, {
+          httpOnly: true,
+        })
+        .status(200)
+        .json(other);
     });
+  
 }
+
 
 export const logout = (req, res) =>{
     res.clearCookie("access_token",{
