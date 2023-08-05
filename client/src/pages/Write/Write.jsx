@@ -3,7 +3,7 @@ import moment from 'moment';
 import React, { useState } from 'react'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Write = () => {
 
@@ -13,6 +13,8 @@ const Write = () => {
   const [desc, setDesc] = useState(state?.description  || '');
   const [file, setFile] = useState(null);
   const [cat, setCat] = useState(state?.cat  ||"");
+
+  const navigate = useNavigate()
 
   const upload = async () =>{
     try {
