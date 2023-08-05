@@ -14,6 +14,8 @@ const Single = () => {
 
   const [post, setPost] = useState([]);
 
+  
+
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -52,10 +54,7 @@ const Single = () => {
     }
   }
 
-  const getText = (html) =>{
-    const doc = new DOMParser().parseFromString(html, "text/html")
-    return doc.body.textContent
-  }
+  console.log(post)
 
   return (
     <div className="single">
@@ -67,10 +66,10 @@ const Single = () => {
             alt=""
           />}
           <div className="info">
-            <span>{post.username}</span>
+            <span>{post?.username}</span>
             <p>Posted {moment(post.date).fromNow()}</p>
           </div>
-          {currentUser.username === post.username && (
+          {currentUser?.username === post.username && (
             <div className="edit">
               <Link to={`/write?edit=2`} state={post}>
                 <img src={Edit} alt="" />
